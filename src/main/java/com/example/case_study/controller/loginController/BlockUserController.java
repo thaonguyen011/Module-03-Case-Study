@@ -1,4 +1,4 @@
-package com.example.case_study.controller;
+package com.example.case_study.controller.loginController;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,7 +25,7 @@ public class BlockUserController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("username");
-        HttpSession httpSession = req.getSession();
-        httpSession.setAttribute(username, true);
+        HttpSession session = req.getSession();
+        session.setAttribute(username, true);
     }
 }

@@ -17,7 +17,7 @@ public class MobileWalletOptionController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher dispatcher = req.getRequestDispatcher("");
+        RequestDispatcher dispatcher = req.getRequestDispatcher("mobileWalletOption.jsp");
         dispatcher.forward(req, resp);
     }
 
@@ -32,7 +32,6 @@ public class MobileWalletOptionController extends HttpServlet {
        userService.update(newUser);
 
         // chuyen trang thanh toan bang qr cua momo
-        RequestDispatcher dispatcher = req.getRequestDispatcher("");
-        dispatcher.forward(req, resp);
+        resp.sendRedirect("/momo");
     }
 }

@@ -19,7 +19,7 @@ public class LoginValidator implements Validator{
     @Override
     public boolean isCheck() {
         for (User user : userList) {
-            if ((username.equals(user.getUsername()) || username.equals(user.getPhone())) && password.equals(user.getPassword())) {
+            if ((username.equals(user.getUsername()) || username.equals(user.getPhone()) || username.equals(user.getEmail())) && password.equals(user.getPassword())) {
                 return true;
             }
         }

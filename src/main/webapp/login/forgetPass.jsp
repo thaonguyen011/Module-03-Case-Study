@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
   Created by IntelliJ IDEA.
   User: apple
@@ -13,15 +14,23 @@
 <body>
 <h1>Forget Password</h1>
 <p>A code sent to your email. Please check mail and enter code to validate</p>
-<form method="post">
+<form action="/login/forgetPassword"method="post">
   <label>
-    <input type="text" name="code">
+    <input type="text" name="code" oninput="change()">
   </label>
+  <c:if test="${codeValidate == false}">
+    <p style="color:red" id="change">Wrong code</p>
+  </c:if>
   <label>
     <input type="submit" value="Submit">
   </label>
 </form>
 <p>Do not receive code</p>
-<a href="${pageContext.request.contextPath}/send-code-again">Send code again</a>
+<a href="${pageContext.request.contextPath}/login/sendCode">Send code again</a>
 </body>
+<script>
+  function change() {
+    document.getElementById("change").style.display = "none";
+  }
+</script>
 </html>

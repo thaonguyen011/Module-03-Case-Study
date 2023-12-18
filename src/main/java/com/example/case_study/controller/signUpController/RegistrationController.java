@@ -8,30 +8,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet("/signup/paymentPicker")
-public class PaymentPickerController extends HttpServlet {
+@WebServlet("/signup/registration")
+public class RegistrationController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher dispatcher = req.getRequestDispatcher("paymentPicker.jsp");
-        dispatcher.forward(req, resp);
+        RequestDispatcher dispatcher = req.getRequestDispatcher("registration.jsp");
+        dispatcher.forward(req,resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String paymentForm = req.getParameter("paymentForm");
-
-        switch (paymentForm) {
-            case "credit":
-                resp.sendRedirect("/signup/creditOption");
-                break;
-            case "wallet":
-                resp.sendRedirect("/signup/mobileWalletOption");
-                break;
-            default:
-                break;
-        }
-
+        resp.sendRedirect("/signup/regform");
     }
-
-
 }

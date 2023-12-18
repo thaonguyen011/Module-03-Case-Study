@@ -11,8 +11,9 @@
     <title>Netflix</title>
 </head>
 <body>
+<h1>Step 3 of 3</h1>
 <h1>Choose payment form</h1>
-<form method="post">
+<form action="${pageContext.request.contextPath}/signup/paymentPicker" method="post">
   <label>
     <input type="radio" name="paymentForm" value="credit">Credit
   </label>
@@ -21,6 +22,13 @@
   </label>
   <input type="submit" value="Submit">
 </form>
+<script>
+  localStorage.setItem("lastSignUpStep", "Step3");
 
+  let dataSend = localStorage.getItem("lastSignUpStep");
+  let xhr = new XMLHttpRequest();
+  xhr.open('POST', '/signup/paymentPicker', true);
+
+</script>
 </body>
 </html>

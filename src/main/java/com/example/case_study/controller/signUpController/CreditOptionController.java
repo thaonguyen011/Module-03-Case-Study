@@ -15,7 +15,7 @@ import java.io.IOException;
 public class CreditOptionController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher dispatcher = req.getRequestDispatcher("");
+        RequestDispatcher dispatcher = req.getRequestDispatcher("creditOption.jsp");
         dispatcher.forward(req, resp);
     }
 

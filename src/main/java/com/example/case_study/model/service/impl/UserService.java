@@ -44,5 +44,14 @@ public class UserService implements IUserService {
         return userDAO.getUserByUsername(username);
     }
 
+    @Override
+    public boolean isExistUser(String username) {
+        for (User user : selectAll()) {
+            if (username.equals(user.getUsername()) || username.equals(user.getEmail()) || username.equals(user.getPhone())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

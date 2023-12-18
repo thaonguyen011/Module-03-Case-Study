@@ -13,10 +13,10 @@ public class UserDAO implements IUserDAO {
     private final static String jdbcPassword = "Modicung2486!";
     private final static String SELECT_ALL_USERS = "select * from user;";
     private final static String SELECT_USER_BY_ID = "select * from user where id = ?;";
-    private final static String INSERT_USER = "insert into user(username, password, phone, email) values (?,?,?,?)";
+    private final static String INSERT_USER = "insert into user(username, password, phone, email) values (?,?,?,?);";
     private final static String UPDATE_USER = "update user set username= ?, password =?, phone =?, email=? where id = ?;";
     private final static String DELETE_USER = "delete user where id = ?;";
-    private final static String SELECT_USER_BY_USERNAME = "select * from user where username = ?;";
+    private final static String SELECT_USER_BY_USERNAME = "select * from user where username = ? or email = ?;";
     @Override
     public Connection getConnection() {
         Connection connection = null;
@@ -131,6 +131,7 @@ public class UserDAO implements IUserDAO {
             Connection connection = getConnection();
             PreparedStatement ps = connection.prepareStatement(SELECT_USER_BY_USERNAME);
             ps.setString(1, username);
+            ps.setString(2, username);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -144,5 +145,6 @@ public class UserDAO implements IUserDAO {
         }
         return user;
     }
+
 
 }

@@ -4,38 +4,34 @@ package com.example.case_study.model.utils.login;
 import com.example.case_study.model.entity.User;
 import com.example.case_study.model.service.IUserService;
 import com.example.case_study.model.service.impl.UserService;
-import com.example.case_study.model.utils.generator.IGenerator;
-import com.example.case_study.model.utils.generator.RandomCode;
-import com.mysql.cj.protocol.Message;
+import com.example.case_study.model.utils.generator.CodeGenerator;
 
 import javax.mail.*;
 import javax.mail.internet.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
+import java.util.*;
 
 
 public class LoginManager {
     private static LoginManager instance;
     private final int MAX_LOGIN_ATTEMPTS = 5;
     private final IUserService userService;
-    private final Map<String, Integer> loginAttemptsManagement;
-    private final Map<String, Long> lockedUserManagement;
-    private final Map<String, Integer> codeValidateManagement;
+    private final Map<Integer, Integer> loginAttemptsManagement;
+    private final Map<Integer, Long> lockedUserManagement;
+    private final Map<Integer, String> codeValidateManagement;
+    private List<Integer> onlineUsers;
     private final long BLOCK_DURATION =  5 * 10 * 1000;
-//    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
 
     private LoginManager() {
         userService = new UserService();
         loginAttemptsManagement = new HashMap<>();
         for (User user : userService.selectAll()) {
-            loginAttemptsManagement.put(user.getUsername(), 0);
+            loginAttemptsManagement.put(user.getId(), 0);
         }
         lockedUserManagement = new HashMap<>();
         codeValidateManagement = new HashMap<>();
-//        scheduler.scheduleAtFixedRate(this::clearBlock, 0, 1, TimeUnit.MINUTES);
+        onlineUsers = new ArrayList<>();
+
     }
 
 
@@ -53,32 +49,32 @@ public class LoginManager {
         User user = userService.getUserByUsername(loginRequest.getUsername());
         if (user == null) {
             return 0;
-        } else if (isBlockedUser(user.getUsername())) {
+        } else if (isBlockedUser(loginRequest.getUsername())) {
             return 6;
-        } else if (loginValidator.isCheck() && loginAttemptsManagement.get(user.getUsername())<= MAX_LOGIN_ATTEMPTS) {
+        } else if (loginValidator.isCheck() && loginAttemptsManagement.get(user.getId())<= MAX_LOGIN_ATTEMPTS) {
             return -1;
         } else {
-            if (loginAttemptsManagement.get(user.getUsername())<= MAX_LOGIN_ATTEMPTS) {
-                int count1= loginAttemptsManagement.get(user.getUsername()) + 1;
+            if (loginAttemptsManagement.get(user.getId())<= MAX_LOGIN_ATTEMPTS) {
+                int count1= loginAttemptsManagement.get(user.getId()) + 1;
                 if (count1 == 3) {
                     sendAlertEmail(user.getEmail(), user.getUsername());
                 }
-                loginAttemptsManagement.replace(user.getUsername(), count1);
+                loginAttemptsManagement.replace(user.getId(), count1);
                 return count1;
             } else {
-                blockUser(user.getUsername());
+                blockUser(user.getId());
                 return 6;
             }
         }
     }
 
-    public void blockUser(String username) {
-        lockedUserManagement.put(username, System.currentTimeMillis() + BLOCK_DURATION);
+    public void blockUser(int userId) {
+        lockedUserManagement.put(userId, System.currentTimeMillis() + BLOCK_DURATION);
     }
 
     public void clearBlock() {
         long currentTime = System.currentTimeMillis();
-        for (Map.Entry<String, Long> entry : lockedUserManagement.entrySet()) {
+        for (Map.Entry<Integer, Long> entry : lockedUserManagement.entrySet()) {
             if (currentTime > entry.getValue()) {
                 lockedUserManagement.remove(entry.getKey());
                 loginAttemptsManagement.replace(entry.getKey(), 0);
@@ -121,7 +117,7 @@ public class LoginManager {
 
             Transport.send(message);
 
-            System.out.println("Email sent successfully.");
+            System.out.println("Alert Email sent successfully.");
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -145,9 +141,17 @@ public class LoginManager {
             }
         });
 
-        IGenerator randomCode = new RandomCode();
-        int code = (int) randomCode.generate();
-        codeValidateManagement.put(email, code);
+        CodeGenerator randomCode = new CodeGenerator();
+        String code = randomCode.generate();
+        int userId = 0;
+
+        for (User user : userService.selectAll()) {
+            if (email.equals(user.getEmail())) {
+                userId = user.getId();
+                break;
+            }
+        }
+        codeValidateManagement.put(userId, code);
 
         try {
             javax.mail.Message message = new MimeMessage(session);
@@ -157,7 +161,7 @@ public class LoginManager {
             message.setText("This is a code validation email sent from netflix. Code is " + code);
             Transport.send(message);
 
-            System.out.println("Email sent successfully.");
+            System.out.println("Code Email sent successfully.");
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -167,9 +171,41 @@ public class LoginManager {
     public boolean isBlockedUser(String username) {
         return lockedUserManagement.containsKey(username);
     }
-
-    public boolean validateCode(String email, int code) {
-        return codeValidateManagement.get(email).equals(code);
+    public boolean isExistedUser(String username) {
+        return userService.isExistUser(username);
+    }
+    public boolean validateCode(int userId, String code) {
+        return codeValidateManagement.get(userId).equals(code);
     }
 
+    public void addOnlineUser(int userId) {
+        onlineUsers.add(userId);
+    }
+
+    public void removeOnlineUser(int userId) {
+        onlineUsers.remove(userId);
+    }
+    public boolean isOnlineUser(int userId) {
+        return onlineUsers.contains(userId);
+    }
+
+    public Map<Integer, Integer> getLoginAttemptsManagement() {
+        return loginAttemptsManagement;
+    }
+
+    public Map<Integer, Long> getLockedUserManagement() {
+        return lockedUserManagement;
+    }
+
+    public Map<Integer, String> getCodeValidateManagement() {
+        return codeValidateManagement;
+    }
+
+    public List<Integer> getOnlineUsers() {
+        return onlineUsers;
+    }
+
+    public void setOnlineUsers(List<Integer> onlineUsers) {
+        this.onlineUsers = onlineUsers;
+    }
 }
